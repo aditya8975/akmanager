@@ -1,0 +1,46 @@
+{
+  "name": "akmanager",
+  "version": "1.0.0",
+  "main": "ak.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ak.js"
+  },
+  "keywords": [],
+  "author": "aditya katare",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "To install dependencies:",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "express": "^4.21.2",
+    "inquirer": "^12.5.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "mongoose": "^8.12.2",
+    "ora": "^8.2.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "react": "^19.0.0",
+    "yarn": "^1.22.22"
+  },
+  "bin": {
+    "ak": "ak.js"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aditya8975/akmanager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aditya8975/akmanager/issues"
+  },
+  "homepage": "https://github.com/aditya8975/akmanager#readme"
+}
