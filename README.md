@@ -111,11 +111,5 @@ npm publish  # Publish to npm
 ```
 
 ---
-## 🏆 Why Use `akmanager`?
-✅ **Faster than npm, yarn, and even Bun**  
-✅ **Prebuilt package caching = No internet required!**  
-✅ **Blazing fast dependency installation**  
-✅ **Built for modern JS frameworks & libraries**  
 
-💡 **Try `akmanager` today and experience the fastest package management ever!** 🚀
 
