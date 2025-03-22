@@ -1,6 +1,5 @@
 # akmanager - The Fastest JavaScript Package Manager
 
-![akmanager Logo](https://example.com/logo.png)  
 **A blazing-fast package manager that outperforms npm, yarn, and even Bun by using prebuilt caches for instant installs!** ⚡
 
 ## 🌟 Features
