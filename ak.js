@@ -9,15 +9,10 @@ import pino from "pino";
 const logger = pino({
   transport: {
     target: "pino-pretty",
-    options: {
-      colorize: true, 
-      translateTime: "HH:MM:ss",
-      ignore: "pid,hostname"
-    }
+    options: { colorize: true, translateTime: "HH:MM:ss", ignore: "pid,hostname" }
   }
 });
 
-const POPULAR_PACKAGES = ["express", "react", "lodash", "axios", "moment", "chalk", "mongoose"];
 const CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, ".prebuilt-cache");
 const DB_PATH = path.join(process.cwd(), "package-db.json");
 
@@ -53,7 +48,7 @@ async function getPackageVersion(pkgName) {
   return version;
 }
 
-function execPromise(command, silent = false) {
+function execPromise(command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) reject({ error, stderr });
@@ -62,52 +57,145 @@ function execPromise(command, silent = false) {
   });
 }
 
-async function installPackages(packages, isGlobal = false, silent = false) {
-  if (!packages.length) {
-    if (!silent) logger.error(chalk.yellow("No packages provided"));
-    return;
-  }
+// 📦 Install Packages
+async function installPackages(packages, isGlobal = false) {
+  if (!packages.length) return logger.error(chalk.yellow("No packages provided"));
   logger.info(chalk.cyan(`Installing ${packages.join(", ")}...`));
-  const cacheHits = [];
-  const toInstall = [];
+  const command = `${isGlobal ? "npm install -g" : "npm install"} ${packages.join(" ")}`;
+  try {
+    await execPromise(command);
+    logger.info(chalk.green(`Installed: ${packages.join(", ")}`));
+  } catch (error) {
+    logger.error(chalk.red(`Failed: ${error.stderr || "Packages not found"}`));
+  }
+}
 
-  await Promise.all(packages.map(async (pkg) => {
-    const version = await getPackageVersion(pkg);
-    const cachePath = path.join(CACHE_DIR, `${pkg}-${version}`);
-    if (await fs.access(cachePath).then(() => true).catch(() => false)) {
-      cacheHits.push({ pkg, cachePath });
-    } else {
-      toInstall.push(pkg);
-    }
-  }));
+// 🗑 Uninstall Packages
+async function uninstallPackages(packages, isGlobal = false) {
+  if (!packages.length) return logger.warn(chalk.yellow("No packages provided"));
+  logger.info(chalk.cyan(`Uninstalling ${packages.join(", ")}...`));
+  const command = `${isGlobal ? "npm uninstall -g" : "npm uninstall"} ${packages.join(" ")}`;
+  try {
+    await execPromise(command);
+    logger.info(chalk.green(`Uninstalled: ${packages.join(", ")}`));
+  } catch (error) {
+    logger.error(chalk.red(`Failed: ${error.stderr || "Packages not found"}`));
+  }
+}
 
-  await Promise.all(cacheHits.map(async ({ pkg, cachePath }) => {
-    const target = path.join(process.cwd(), "node_modules", pkg);
-    await fs.symlink(cachePath, target, "dir").catch(() => fs.cp(cachePath, target, { recursive: true }));
-    logger.info(chalk.green(`${pkg} cached`));
-  }));
+// 🔄 Update Packages
+async function updatePackages(packages, isGlobal = false) {
+  if (!packages.length) return logger.warn(chalk.yellow("No packages provided"));
+  logger.info(chalk.cyan(`Updating ${packages.join(", ")}...`));
+  const command = `${isGlobal ? "npm update -g" : "npm update"} ${packages.join(" ")}`;
+  try {
+    await execPromise(command);
+    logger.info(chalk.green(`Updated: ${packages.join(", ")}`));
+  } catch (error) {
+    logger.error(chalk.red(`Failed: ${error.stderr || "Packages not found"}`));
+  }
+}
 
-  if (toInstall.length) {
-    const command = `${isGlobal ? "bun add -g" : "bun add"} ${toInstall.join(" ")}`;
-    try {
-      await execPromise(command, silent);
-      logger.info(chalk.green(`Installed ${toInstall.join(", ")}`));
-    } catch (error) {
-      logger.error(chalk.red(`Failed: ${error.stderr || "Packages not found"}`));
-    }
+// 📃 List Installed Packages
+async function listPackages() {
+  try {
+    const { stdout } = await execPromise("npm list --depth=0");
+    logger.info(chalk.cyan("Installed Packages:\n") + stdout);
+  } catch (error) {
+    logger.error(chalk.red(`Failed to list packages: ${error.stderr}`));
+  }
+}
+
+// 🔍 Search for a Package
+async function searchPackage(pkg) {
+  if (!pkg) return logger.warn(chalk.yellow("No package specified for search"));
+  logger.info(chalk.cyan(`Searching for package: ${pkg}`));
+  try {
+    const { stdout } = await execPromise(`npm search ${pkg}`);
+    logger.info(chalk.green(stdout));
+  } catch (error) {
+    logger.error(chalk.red(`Search failed: ${error.stderr}`));
+  }
+}
+
+// ℹ️ Get Package Info
+async function getPackageInfo(pkg) {
+  if (!pkg) return logger.warn(chalk.yellow("No package specified"));
+  logger.info(chalk.cyan(`Fetching info for package: ${pkg}`));
+  try {
+    const { stdout } = await execPromise(`npm info ${pkg}`);
+    logger.info(chalk.green(stdout));
+  } catch (error) {
+    logger.error(chalk.red(`Failed to fetch package info: ${error.stderr}`));
+  }
+}
+
+// 🚀 Run a Script from package.json
+async function runScript(scriptName) {
+  if (!scriptName) return logger.warn(chalk.yellow("No script specified"));
+  logger.info(chalk.cyan(`Running script: ${scriptName}`));
+  try {
+    const { stdout } = await execPromise(`npm run ${scriptName}`);
+    logger.info(chalk.green(stdout));
+  } catch (error) {
+    logger.error(chalk.red(`Failed to run script: ${error.stderr}`));
+  }
+}
+
+// 🆕 Initialize a New Package
+async function initPackage() {
+  logger.info(chalk.cyan("Initializing new package.json..."));
+  try {
+    await execPromise("npm init -y");
+    logger.info(chalk.green("package.json created successfully"));
+  } catch (error) {
+    logger.error(chalk.red(`Failed to initialize package: ${error.stderr}`));
   }
 }
 
 // CLI setup
 program.version("1.0.0").description("ak - Faster than light");
 
-program
-  .command("install [packages...]")
+// 📦 Install
+program.command("install [packages...]")
   .alias("i")
   .option("-g, --global", "Install globally")
-  .option("-s, --silent", "No output")
-  .action((packages, options) => installPackages(packages, options.global, options.silent));
+  .action((packages, options) => installPackages(packages, options.global));
 
+// 🗑 Uninstall
+program.command("uninstall [packages...]")
+  .alias("un")
+  .option("-g, --global", "Uninstall globally")
+  .action((packages, options) => uninstallPackages(packages, options.global));
+
+// 🔄 Update
+program.command("update [packages...]")
+  .alias("up")
+  .option("-g, --global", "Update globally")
+  .action((packages, options) => updatePackages(packages, options.global));
+
+// 📃 List Packages
+program.command("list")
+  .alias("ls")
+  .action(listPackages);
+
+// 🔍 Search Package
+program.command("search <pkg>")
+  .action(searchPackage);
+
+// ℹ️ Get Package Info
+program.command("info <pkg>")
+  .action(getPackageInfo);
+
+// 🚀 Run Script
+program.command("run <script>")
+  .action(runScript);
+
+// 🆕 Init
+program.command("init")
+  .action(initPackage);
+
+// Default message
 program.action(() => logger.warn(chalk.yellow("No command—try 'ak --help'")));
 
 program.parse(process.argv);
