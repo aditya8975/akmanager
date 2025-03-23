@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const { program } = require("commander");
-const chalk = require("chalk").default;
+const chalk = await import("chalk");
 const { exec } = require("child_process");
 const fs = require("fs").promises;
 const path = require("path");
