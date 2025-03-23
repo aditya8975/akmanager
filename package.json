@@ -1,6 +1,6 @@
 {
   "name": "akmanager",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "main": "ak.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,10 +10,9 @@
   "author": "aditya katare",
   "license": "ISC",
   "type": "commonjs",
-  "type": "module",
   "description": "To install dependencies:",
   "dependencies": {
-    "chalk": "^5.4.1",
+    "chalk": "^4.1.0",
     "commander": "^13.1.0",
     "express": "^4.21.2",
     "inquirer": "^12.5.0",
@@ -29,7 +28,6 @@
   "bin": {
     "ak": "ak.js"
   },
- 
   "devDependencies": {
     "@types/bun": "latest"
   },
