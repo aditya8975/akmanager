@@ -16,7 +16,6 @@ const logger = pino({
 const CACHE_DIR = path.join(process.env.HOME || process.env.USERPROFILE, ".prebuilt-cache");
 const DB_PATH = path.join(process.cwd(), "package-db.json");
 
-// In-memory cache
 const versionCache = new Map();
 
 async function loadPackageDB() {
@@ -57,7 +56,7 @@ function execPromise(command) {
   });
 }
 
-// 📦 Install Packages
+
 async function installPackages(packages, isGlobal = false) {
   if (!packages.length) return logger.error(chalk.yellow("No packages provided"));
   logger.info(chalk.cyan(`Installing ${packages.join(", ")}...`));
@@ -70,7 +69,7 @@ async function installPackages(packages, isGlobal = false) {
   }
 }
 
-// 🗑 Uninstall Packages
+
 async function uninstallPackages(packages, isGlobal = false) {
   if (!packages.length) return logger.warn(chalk.yellow("No packages provided"));
   logger.info(chalk.cyan(`Uninstalling ${packages.join(", ")}...`));
@@ -83,7 +82,7 @@ async function uninstallPackages(packages, isGlobal = false) {
   }
 }
 
-// 🔄 Update Packages
+
 async function updatePackages(packages, isGlobal = false) {
   if (!packages.length) return logger.warn(chalk.yellow("No packages provided"));
   logger.info(chalk.cyan(`Updating ${packages.join(", ")}...`));
@@ -96,7 +95,6 @@ async function updatePackages(packages, isGlobal = false) {
   }
 }
 
-// 📃 List Installed Packages
 async function listPackages() {
   try {
     const { stdout } = await execPromise("npm list --depth=0");
@@ -106,7 +104,7 @@ async function listPackages() {
   }
 }
 
-// 🔍 Search for a Package
+
 async function searchPackage(pkg) {
   if (!pkg) return logger.warn(chalk.yellow("No package specified for search"));
   logger.info(chalk.cyan(`Searching for package: ${pkg}`));
@@ -118,7 +116,7 @@ async function searchPackage(pkg) {
   }
 }
 
-// ℹ️ Get Package Info
+
 async function getPackageInfo(pkg) {
   if (!pkg) return logger.warn(chalk.yellow("No package specified"));
   logger.info(chalk.cyan(`Fetching info for package: ${pkg}`));
@@ -130,7 +128,7 @@ async function getPackageInfo(pkg) {
   }
 }
 
-// 🚀 Run a Script from package.json
+
 async function runScript(scriptName) {
   if (!scriptName) return logger.warn(chalk.yellow("No script specified"));
   logger.info(chalk.cyan(`Running script: ${scriptName}`));
@@ -142,7 +140,6 @@ async function runScript(scriptName) {
   }
 }
 
-// 🆕 Initialize a New Package
 async function initPackage() {
   logger.info(chalk.cyan("Initializing new package.json..."));
   try {
@@ -153,49 +150,47 @@ async function initPackage() {
   }
 }
 
-// CLI setup
+
 program.version("1.0.0").description("ak - Faster than light");
 
-// 📦 Install
+
 program.command("install [packages...]")
   .alias("i")
   .option("-g, --global", "Install globally")
   .action((packages, options) => installPackages(packages, options.global));
 
-// 🗑 Uninstall
+
 program.command("uninstall [packages...]")
   .alias("un")
   .option("-g, --global", "Uninstall globally")
   .action((packages, options) => uninstallPackages(packages, options.global));
 
-// 🔄 Update
+
 program.command("update [packages...]")
   .alias("up")
   .option("-g, --global", "Update globally")
   .action((packages, options) => updatePackages(packages, options.global));
 
-// 📃 List Packages
+
 program.command("list")
   .alias("ls")
   .action(listPackages);
 
-// 🔍 Search Package
+
 program.command("search <pkg>")
   .action(searchPackage);
 
-// ℹ️ Get Package Info
 program.command("info <pkg>")
   .action(getPackageInfo);
 
-// 🚀 Run Script
 program.command("run <script>")
   .action(runScript);
 
-// 🆕 Init
+
 program.command("init")
   .action(initPackage);
 
-// Default message
+
 program.action(() => logger.warn(chalk.yellow("No command—try 'ak --help'")));
 
 program.parse(process.argv);
