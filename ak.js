@@ -12,12 +12,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const CACHE_DIR = process.env.AKMANAGER_CACHE_DIR || path.join(process.env.HOME, ".akmanager-cache");
+const CACHE_DIR = process.env.AKMANAGER_CACHE_DIR || path.join(os.homedir(), ".akmanager-cache");
 const MANIFEST_PATH = path.join(CACHE_DIR, "cache-manifest.json");
 const INSTALL_TIMEOUT = parseInt(process.env.AKMANAGER_INSTALL_TIMEOUT, 10) || 30000;
 const REGISTRY_URL = process.env.AKMANAGER_REGISTRY_URL || "https://registry.npmjs.org";
 const BUN_PATH = process.env.AKMANAGER_BUN_PATH || "bun";
-const GLOBAL_DIR = process.env.AKMANAGER_GLOBAL_DIR || path.join(process.env.HOME, ".bun", "install", "global");
+const GLOBAL_DIR = process.env.AKMANAGER_GLOBAL_DIR || path.join(os.homedir(), ".bun", "install", "global");
 
 const logger = pino({
   transport: { target: "pino-pretty", options: { colorize: true, translateTime: "HH:MM:ss" } }
