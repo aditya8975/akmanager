@@ -9,6 +9,7 @@ import pino from "pino";
 import fetch from "node-fetch";
 import { createHash } from "crypto";
 import dotenv from "dotenv";
+import os from "os"; // Import the 'os' module
 
 dotenv.config();
 
